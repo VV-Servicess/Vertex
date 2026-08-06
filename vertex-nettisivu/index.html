@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERTEX – CS2 Web Radar & More</title>
+<link rel="icon" type="image/png" href="vertex-logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #7b2fff;
+    --purple-light: #a855f7;
+    --purple-glow: #9333ea;
+    --silver: #c0c0c0;
+    --silver-light: #e8e8e8;
+    --dark: #06000f;
+    --dark2: #0d0019;
+    --dark3: #110020;
+    --border: rgba(123,47,255,0.4);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--silver-light);
+    font-family: 'Rajdhani', sans-serif;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ANIMATED BG */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 30%, rgba(123,47,255,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 70%, rgba(80,0,160,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 80% 60% at 50% 50%, rgba(30,0,60,0.5) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* STARS */
+  .stars {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .star {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle var(--d, 3s) ease-in-out infinite var(--delay, 0s);
+    opacity: 0;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--op, 0.6); }
+  }
+
+  /* NAVBAR */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 60px;
+    background: rgba(6,0,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .nav-logo img {
+    width: 48px;
+    height: 48px;
+    display: block;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 50%;
+    border: 2px solid var(--purple);
+    box-shadow: 0 0 16px rgba(123,47,255,0.6);
+  }
+  .nav-brand {
+    font-family: 'Orbitron', monospace;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, var(--purple-light), var(--silver));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--silver);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+  }
+  .nav-links a:hover {
+    color: var(--purple-light);
+    text-shadow: 0 0 12px rgba(168,85,247,0.8);
+  }
+  .nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+  }
+  .language-switch {
+    position: relative;
+  }
+  .language-toggle {
+    appearance: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: rgba(12,0,28,0.88);
+    color: white;
+    min-width: 76px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.78rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    cursor: pointer;
+    box-shadow: inset 0 0 14px rgba(123,47,255,0.18), 0 0 14px rgba(123,47,255,0.25);
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  }
+  .ui-icon {
+    width: 1.15em;
+    height: 1.15em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex: 0 0 auto;
+  }
+  .ui-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .language-toggle .ui-icon {
+    width: 17px;
+    height: 17px;
+  }
+  .language-toggle:hover,
+  .language-switch.open .language-toggle {
+    border-color: var(--purple-light);
+    box-shadow: 0 0 24px rgba(123,47,255,0.55);
+    transform: translateY(-1px);
+  }
+  .language-menu {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    z-index: 120;
+    width: 150px;
+    display: grid;
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: rgba(8,0,18,0.96);
+    box-shadow: 0 18px 42px rgba(0,0,0,0.5), 0 0 24px rgba(123,47,255,0.28);
+    opacity: 0;
+    transform: translateY(-8px);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .language-switch.open .language-menu {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .language-switch .lang-option {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    width: 100%;
+    min-height: 34px;
+    border-radius: 6px;
+    padding: 0 10px;
+    text-align: left;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.72rem;
+    font-weight: 900;
+    color: rgba(232,232,232,0.78);
+    cursor: pointer;
+    user-select: none;
+  }
+  .language-switch .lang-option:hover {
+    background: rgba(123,47,255,0.18);
+    color: white;
+  }
+  .language-switch .lang-option.active {
+    background: linear-gradient(135deg, rgba(123,47,255,0.82), rgba(168,85,247,0.65));
+    color: white;
+  }
+  .nav-discord {
+    background: linear-gradient(135deg, var(--purple), #5b21b6);
+    color: white !important;
+    padding: 10px 22px;
+    border-radius: 6px;
+    border: 1px solid rgba(123,47,255,0.5);
+    box-shadow: 0 0 20px rgba(123,47,255,0.3);
+    transition: box-shadow 0.3s, transform 0.2s !important;
+  }
+  .nav-discord:hover {
+    box-shadow: 0 0 35px rgba(123,47,255,0.7) !important;
+    transform: translateY(-1px);
+    color: white !important;
+    text-shadow: none !important;
+  }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 40px 60px;
+  }
+
+  .hero-logo-wrap {
+    position: relative;
+    margin-bottom: 40px;
+    animation: heroFloat 4s ease-in-out infinite;
+  }
+  @keyframes heroFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+  .hero-logo { display:none;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid var(--purple);
+    box-shadow:
+      0 0 40px rgba(123,47,255,0.8),
+      0 0 80px rgba(123,47,255,0.4),
+      0 0 120px rgba(123,47,255,0.2);
+    animation: logoPulse 3s ease-in-out infinite;
+  }
+  @keyframes logoPulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(123,47,255,0.8), 0 0 80px rgba(123,47,255,0.4), 0 0 120px rgba(123,47,255,0.2); }
+    50% { box-shadow: 0 0 60px rgba(123,47,255,1), 0 0 100px rgba(123,47,255,0.6), 0 0 160px rgba(123,47,255,0.3); }
+  }
+
+  .hero-tag {
+    display: inline-block;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    color: var(--purple-light);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    border: 1px solid rgba(168,85,247,0.4);
+    padding: 6px 20px;
+    border-radius: 2px;
+    background: rgba(123,47,255,0.08);
+    animation: fadeDown 0.8s ease both 0.2s;
+  }
+
+  .hero-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 24px;
+    background: linear-gradient(135deg, #fff 0%, var(--purple-light) 40%, var(--silver) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 30px rgba(123,47,255,0.5));
+    animation: fadeDown 0.8s ease both 0.4s;
+  }
+
+  .hero-sub {
+    font-size: 1.2rem;
+    font-weight: 300;
+    letter-spacing: 2px;
+    color: rgba(200,200,220,0.7);
+    max-width: 560px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    animation: fadeDown 0.8s ease both 0.6s;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeDown 0.8s ease both 0.8s;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, var(--purple), #5b21b6);
+    color: white;
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    border: 1px solid rgba(168,85,247,0.5);
+    box-shadow: 0 0 30px rgba(123,47,255,0.4);
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .btn-primary:hover {
+    box-shadow: 0 0 50px rgba(123,47,255,0.7);
+    transform: translateY(-2px);
+  }
+  .btn-primary:hover::before { opacity: 1; }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 36px;
+    background: transparent;
+    color: var(--silver-light);
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--purple-light);
+    color: var(--purple-light);
+    box-shadow: 0 0 20px rgba(123,47,255,0.2);
+    transform: translateY(-2px);
+  }
+
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* DIVIDER */
+  .divider {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 60px;
+    margin: 0 auto;
+    max-width: 1100px;
+  }
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+  }
+  .divider-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--purple-light);
+    box-shadow: 0 0 10px var(--purple);
+  }
+
+  /* SECTIONS */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 5px;
+    color: var(--purple-light);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 30px;
+    height: 1px;
+    background: var(--purple-light);
+  }
+
+  .section-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.8rem, 3vw, 2.8rem);
+    font-weight: 900;
+    margin-bottom: 60px;
+    background: linear-gradient(135deg, #fff, var(--silver));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* PRODUCTS GRID */
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .product-card {
+    background: linear-gradient(145deg, rgba(17,0,32,0.9), rgba(10,0,20,0.95));
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: default;
+  }
+  .product-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--purple), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .product-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(123,47,255,0.08), transparent 60%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    border-color: rgba(123,47,255,0.6);
+    box-shadow: 0 20px 60px rgba(123,47,255,0.2);
+  }
+  .product-card:hover::before,
+  .product-card:hover::after { opacity: 1; }
+
+  .card-icon {
+    width: 56px; height: 56px;
+    background: rgba(123,47,255,0.15);
+    border: 1px solid rgba(123,47,255,0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 20px; right: 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 2px;
+    padding: 4px 12px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .badge-hot {
+    background: rgba(239,68,68,0.15);
+    color: #f87171;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+  .badge-new {
+    background: rgba(123,47,255,0.2);
+    color: var(--purple-light);
+    border: 1px solid rgba(123,47,255,0.4);
+  }
+  .badge-pro {
+    background: rgba(192,192,192,0.1);
+    color: var(--silver);
+    border: 1px solid rgba(192,192,192,0.3);
+  }
+
+  .card-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #fff;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-desc {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: rgba(200,200,220,0.65);
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .card-features {
+    list-style: none;
+    margin-bottom: 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .card-features li {
+    font-size: 0.9rem;
+    color: rgba(200,200,220,0.7);
+    padding: 5px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-features li::before {
+    content: '▸';
+    color: var(--purple-light);
+    font-size: 0.7rem;
+  }
+
+  .card-price {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--purple-light), var(--silver));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+  }
+  .price-unit {
+    font-size: 0.7rem;
+    opacity: 0.7;
+  }
+
+  .card-btn {
+    display: block;
+    text-align: center;
+    padding: 13px;
+    background: linear-gradient(135deg, rgba(123,47,255,0.2), rgba(91,33,182,0.2));
+    border: 1px solid rgba(123,47,255,0.4);
+    border-radius: 6px;
+    color: var(--purple-light);
+    text-decoration: none;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1;
+  }
+  .card-btn:hover {
+    background: linear-gradient(135deg, rgba(123,47,255,0.4), rgba(91,33,182,0.4));
+    border-color: var(--purple);
+    box-shadow: 0 0 20px rgba(123,47,255,0.3);
+    color: #fff;
+  }
+
+  /* FEATURES */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+  }
+  .feature-item {
+    padding: 28px 24px;
+    background: rgba(17,0,32,0.5);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+  .feature-item:hover {
+    border-color: rgba(123,47,255,0.5);
+    transform: translateY(-4px);
+  }
+  .card-icon .ui-icon {
+    width: 30px;
+    height: 30px;
+  }
+  .feature-icon {
+    width: 34px;
+    height: 34px;
+    margin-bottom: 16px;
+    color: #fff;
+  }
+  .feature-icon .ui-icon {
+    width: 100%;
+    height: 100%;
+  }
+  .feature-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+  .feature-text {
+    font-size: 0.88rem;
+    color: rgba(200,200,220,0.6);
+    line-height: 1.6;
+  }
+
+  /* TESTIMONIALS / STATUS */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+    padding: 32px 60px;
+    background: rgba(17,0,32,0.7);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .status-num {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--purple-light), var(--silver));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .status-label {
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    color: rgba(200,200,220,0.5);
+    text-transform: uppercase;
+  }
+  .status-dot {
+    width: 1px;
+    height: 40px;
+    background: var(--border);
+  }
+
+  /* CTA */
+  .cta-section {
+    text-align: center;
+    padding: 120px 60px;
+    position: relative;
+    z-index: 1;
+  }
+  .cta-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(123,47,255,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .cta-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff, var(--purple-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  .cta-sub {
+    font-size: 1.1rem;
+    color: rgba(200,200,220,0.6);
+    letter-spacing: 1px;
+    margin-bottom: 48px;
+  }
+
+  /* DISCORD BANNER */
+  .discord-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 40px;
+    background: linear-gradient(135deg, #5865F2, #4752c4);
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 0 40px rgba(88,101,242,0.4);
+    transition: all 0.3s;
+  }
+  .discord-banner:hover {
+    box-shadow: 0 0 70px rgba(88,101,242,0.7);
+    transform: translateY(-3px) scale(1.02);
+  }
+  .discord-icon {
+    width: 24px;
+    height: 24px;
+    color: #fff;
+  }
+  .badge-icon {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    vertical-align: -2px;
+  }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 40px 60px;
+    border-top: 1px solid var(--border);
+    color: rgba(200,200,220,0.3);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-actions { gap: 12px; }
+    .nav-links { display: none; }
+    .language-toggle { min-width: 68px; height: 36px; font-size: 0.7rem; }
+    .language-menu { width: 138px; }
+    section { padding: 60px 24px; }
+    .status-bar { padding: 24px 20px; gap: 20px; }
+    .status-dot { display: none; }
+    .cta-section { padding: 60px 24px; }
+    footer { padding: 30px 24px; }
+    .divider { padding: 0 24px; }
+  }
+</style>
+</head>
+<body>
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+  <symbol id="icon-globe" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15 15 0 0 1 0 20"></path><path d="M12 2a15 15 0 0 0 0 20"></path>
+  </symbol>
+  <symbol id="icon-shield" viewBox="0 0 24 24">
+    <path d="M12 3 20 6v6c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"></path><path d="m9 12 2 2 4-5"></path>
+  </symbol>
+  <symbol id="icon-message" viewBox="0 0 24 24">
+    <path d="M21 12a8 8 0 0 1-8 8H7l-4 3 1.3-5A8 8 0 1 1 21 12Z"></path>
+  </symbol>
+  <symbol id="icon-target" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 2v4M12 18v4M2 12h4M18 12h4"></path>
+  </symbol>
+  <symbol id="icon-rifle" viewBox="0 0 24 24">
+    <path d="M3 11h12l2-2h4v3h-3l-2 2h-4l-2 5H7l1.5-5H3v-3Z"></path><path d="M6 11V8h4v3"></path><path d="M13 14v3"></path><path d="M18 9V7"></path>
+  </symbol>
+  <symbol id="icon-crown" viewBox="0 0 24 24">
+    <path d="m3 8 5 4 4-7 4 7 5-4-2 11H5L3 8Z"></path><path d="M5 19h14"></path>
+  </symbol>
+  <symbol id="icon-lock" viewBox="0 0 24 24">
+    <rect x="5" y="10" width="14" height="11" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+  </symbol>
+  <symbol id="icon-bolt" viewBox="0 0 24 24">
+    <path d="M13 2 4 14h8l-1 8 9-12h-8l1-8Z"></path>
+  </symbol>
+  <symbol id="icon-gamepad" viewBox="0 0 24 24">
+    <path d="M7 9h10a5 5 0 0 1 4.7 6.7l-.4 1.1a2.4 2.4 0 0 1-4 1l-2.1-2.3H8.8l-2.1 2.3a2.4 2.4 0 0 1-4-1l-.4-1.1A5 5 0 0 1 7 9Z"></path><path d="M8 12v4M6 14h4"></path><path d="M16.5 13h.01"></path><path d="M18.5 15h.01"></path>
+  </symbol>
+  <symbol id="icon-refresh" viewBox="0 0 24 24">
+    <path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"></path><path d="M3 21v-5h5"></path><path d="M3 12A9 9 0 0 1 18.4 5.6L21 8"></path><path d="M21 3v5h-5"></path>
+  </symbol>
+  <symbol id="icon-users" viewBox="0 0 24 24">
+    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.9"></path><path d="M16 3.1a4 4 0 0 1 0 7.8"></path>
+  </symbol>
+  <symbol id="icon-flame" viewBox="0 0 24 24">
+    <path d="M12 22a7 7 0 0 0 7-7c0-4-3-6.5-5-9-.5 2.3-1.7 3.7-3.5 5.1C9 9 8.6 7.2 9 5c-3 2.2-5 5-5 9a8 8 0 0 0 8 8Z"></path>
+  </symbol>
+  <symbol id="icon-spark" viewBox="0 0 24 24">
+    <path d="m12 3 1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Z"></path><path d="m19 16 .8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8L19 16Z"></path>
+  </symbol>
+</svg>
+
+<!-- Stars -->
+<div class="stars" id="stars"></div>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-logo">
+    <img src="vertex-logo.png" alt="VERTEX Logo">
+    <span class="nav-brand">VERTEX</span>
+  </div>
+  <div class="nav-actions">
+    <ul class="nav-links">
+      <li><a href="#products">Tuotteet</a></li>
+      <li><a href="#features">Ominaisuudet</a></li>
+      <li><a href="#discord">Discord</a></li>
+      <li><a href="https://discord.gg/bETDpMZU" target="_blank" class="nav-discord">Liity</a></li>
+    </ul>
+    <div class="language-switch" aria-label="Select language">
+      <button type="button" class="language-toggle" id="languageToggle" aria-haspopup="true" aria-expanded="false">
+        <span class="ui-icon" aria-hidden="true"><svg><use href="#icon-globe"></use></svg></span>
+        <span id="currentLanguage">EN</span>
+      </button>
+      <div class="language-menu" id="languageMenu">
+        <button type="button" class="lang-option" data-lang-option="en">EN · English</button>
+        <button type="button" class="lang-option" data-lang-option="fi">FI · Suomi</button>
+        <button type="button" class="lang-option" data-lang-option="ru">RU · Русский</button>
+        <button type="button" class="lang-option" data-lang-option="de">DE · Deutsch</button>
+        <button type="button" class="lang-option" data-lang-option="fr">FR · Français</button>
+        <button type="button" class="lang-option" data-lang-option="it">IT · Italiano</button>
+        <button type="button" class="lang-option" data-lang-option="es">ES · Español</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-tag">CS2 Premium Services</div>
+  <h1 class="hero-title">Seuraava taso<br>odottaa sinua</h1>
+  <p class="hero-sub">Eksklusiiviset CS2-työkalut, skin changerit ja paljon muuta. Laatu ja turvallisuus ensin.</p>
+  <div class="hero-btns">
+    <a href="#products" class="btn-primary">
+      <span class="ui-icon" aria-hidden="true"><svg><use href="#icon-shield"></use></svg></span><span class="btn-label">Katso tuotteet</span>
+    </a>
+    <a href="https://discord.gg/bETDpMZU" target="_blank" class="btn-secondary">
+      <span class="ui-icon" aria-hidden="true"><svg><use href="#icon-message"></use></svg></span> Discord
+    </a>
+  </div>
+</section>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="status-item">
+    <span class="status-num">500+</span>
+    <span class="status-label">Asiakasta</span>
+  </div>
+  <div class="status-dot"></div>
+  <div class="status-item">
+    <span class="status-num">99%</span>
+    <span class="status-label">Undetected</span>
+  </div>
+  <div class="status-dot"></div>
+  <div class="status-item">
+    <span class="status-num">24/7</span>
+    <span class="status-label">Tuki</span>
+  </div>
+  <div class="status-dot"></div>
+  <div class="status-item">
+    <span class="status-num">3+</span>
+    <span class="status-label">Tuotetta</span>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="section-label">Tuotteet</div>
+  <h2 class="section-title">Mitä tarjoamme</h2>
+  <div class="products-grid">
+
+    <!-- Web Radar -->
+    <div class="product-card reveal">
+      <div class="card-badge badge-hot"><span class="ui-icon badge-icon" aria-hidden="true"><svg><use href="#icon-flame"></use></svg></span>HOT</div>
+      <div class="card-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-target"></use></svg></span></div>
+      <div class="card-title">CS2 Web Radar</div>
+      <div class="card-desc">Tehokas ja turvallinen CS2 web radar, joka näyttää tilanteen selkeästi selaimessa. Jatkuvat päivitykset pitävät palvelun ajan tasalla.</div>
+      <ul class="card-features">
+        <li>Reaaliaikainen pelaajien seuranta</li>
+        <li>Suuntanuolet ja FOV-kartiot</li>
+        <li>Health barit ja pelaajalista</li>
+        <li>Zoomaus ja kartan liikuttelu</li>
+        <li>Killfeed aseilla ja headshot-merkinnöillä</li>
+        <li>Asetukset nimille, kuolleille ja FOV:lle</li>
+      </ul>
+      <div class="card-price">Kysy hintaa <span class="price-unit">/ Discord</span></div>
+      <a href="https://discord.gg/bETDpMZU" target="_blank" class="card-btn">Tilaa nyt →</a>
+    </div>
+
+    <!-- Skin Changer -->
+    <div class="product-card reveal">
+      <div class="card-badge badge-new"><span class="ui-icon badge-icon" aria-hidden="true"><svg><use href="#icon-spark"></use></svg></span>NEW</div>
+      <div class="card-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-rifle"></use></svg></span></div>
+      <div class="card-title">Skin Changer</div>
+      <div class="card-desc">Muuta aseidesi ulkonäkö mistä tahansa mihin tahansa. Kaikki skins saatavillasi ilman rahaa.</div>
+      <ul class="card-features">
+        <li>Kaikki CS2 skinat</li>
+        <li>Knife & Glove changer</li>
+        <li>Sticker support</li>
+        <li>StatTrak emulator</li>
+        <li>Toimimaton serveripuolella</li>
+        <li>Helppo käyttöliittymä</li>
+      </ul>
+      <div class="card-price">Kysy hintaa <span class="price-unit">/ Discord</span></div>
+      <a href="https://discord.gg/bETDpMZU" target="_blank" class="card-btn">Tilaa nyt →</a>
+    </div>
+
+
+
+    <!-- CS2 Cheat -->
+    <div class="product-card reveal">
+      <div class="card-badge badge-pro"><span class="ui-icon badge-icon" aria-hidden="true"><svg><use href="#icon-bolt"></use></svg></span>PRO</div>
+      <div class="card-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-crown"></use></svg></span></div>
+      <div class="card-title">CS2 Cheat</div>
+      <div class="card-desc">Täysiverinen CS2 cheat selkeällä valikolla ja säädettävillä asetuksilla. Päivitetään jokaisen pelipäivityksen mukana.</div>
+      <ul class="card-features">
+        <li>Pelaaja-ESP ja laatikot</li>
+        <li>Triggerbot</li>
+        <li>Rekyylinhallinta</li>
+        <li>Tallennettavat config-profiilit</li>
+        <li>Asennusohje ja Discord-tuki</li>
+      </ul>
+      <div class="card-price">Kysy hintaa <span class="price-unit">/ Discord</span></div>
+      <a href="https://discord.gg/bETDpMZU" target="_blank" class="card-btn">Tilaa nyt →</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"><div class="divider-line"></div><div class="divider-dot"></div><div class="divider-line"></div></div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label">Miksi me?</div>
+  <h2 class="section-title">Ominaisuudet</h2>
+  <div class="features-grid">
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-lock"></use></svg></span></div>
+      <div class="feature-title">Turvallinen</div>
+      <div class="feature-text">Kaikki tuotteet ovat testattu ja pidetään jatkuvasti ajan tasalla. Minimaalinen bänniriski.</div>
+    </div>
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-bolt"></use></svg></span></div>
+      <div class="feature-title">Nopea toimitus</div>
+      <div class="feature-text">Saat tuotteesi nopeasti Discordin kautta. Ei turhia odotteluja.</div>
+    </div>
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-gamepad"></use></svg></span></div>
+      <div class="feature-title">Helppo käyttää</div>
+      <div class="feature-text">Selkeä ohjeistus jokaisen tuotteen kanssa. Ei vaadita teknistä osaamista.</div>
+    </div>
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-message"></use></svg></span></div>
+      <div class="feature-title">24/7 Tuki</div>
+      <div class="feature-text">Ongelmia? Discordissa aina joku apuna. Vastataan nopeasti.</div>
+    </div>
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-refresh"></use></svg></span></div>
+      <div class="feature-title">Päivitykset</div>
+      <div class="feature-text">CS2 päivittyy usein, me pysymme perässä. Saat päivitykset automaattisesti.</div>
+    </div>
+    <div class="feature-item reveal">
+      <div class="feature-icon"><span class="ui-icon" aria-hidden="true"><svg><use href="#icon-users"></use></svg></span></div>
+      <div class="feature-title">Yhteisö</div>
+      <div class="feature-text">Liity aktiiviseen Discord-yhteisöön. Tipit, uutiset ja paljon muuta.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / DISCORD -->
+<div id="discord" class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="section-label" style="justify-content:center">Discord</div>
+  <h2 class="cta-title">Liity yhteisöön</h2>
+  <p class="cta-sub">Kaikki tilaukset, tuki ja uutiset Discordissa. Klikkaa alla.</p>
+  <a href="https://discord.gg/bETDpMZU" target="_blank" class="discord-banner">
+    <span class="ui-icon discord-icon" aria-hidden="true"><svg><use href="#icon-gamepad"></use></svg></span>
+    discord.gg/bETDpMZU
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 VERTEX · Kaikki oikeudet pidätetään · <a href="https://discord.gg/bETDpMZU" target="_blank" style="color:var(--purple-light);text-decoration:none;">Discord</a></p>
+</footer>
+
+<script>
+  const translations = {
+    en: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Products',
+      navFeatures: 'Features',
+      navJoin: 'Join',
+      heroTitle: 'The next level<br>is waiting for you',
+      heroSub: 'Exclusive CS2 tools, skin changers and more. Quality and safety first.',
+      heroProducts: 'View products',
+      statusCustomers: 'Customers',
+      statusSupport: 'Support',
+      statusProducts: 'Products',
+      productsLabel: 'Products',
+      productsTitle: 'What we offer',
+      radarDesc: 'A powerful and safe CS2 web radar that shows the match situation clearly in your browser. Continuous updates keep the service current.',
+      radarFeature1: 'Real-time player tracking',
+      radarFeature2: 'Direction arrows and FOV cones',
+      radarFeature3: 'Health bars and player list',
+      radarFeature4: 'Zoom and map panning',
+      radarFeature5: 'Killfeed with weapons and headshot marks',
+      radarFeature6: 'Toggles for names, dead players and FOV',
+      askPrice: 'Ask price ',
+      orderNow: 'Order now ->',
+      skinDesc: 'Change your weapon look from anything to anything. All skins available without extra spending.',
+      skinFeature1: 'All CS2 skins',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Sticker support',
+      skinFeature4: 'StatTrak emulator',
+      skinFeature5: 'Client-side only',
+      skinFeature6: 'Easy interface',
+      cheatDesc: 'A full-featured CS2 cheat with a clean menu and configurable options. Kept up to date with every game patch.',
+      cheatFeature1: 'Player ESP and boxes',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Recoil control',
+      cheatFeature4: 'Saveable config profiles',
+      cheatFeature5: 'Setup guide and Discord support',
+      whyLabel: 'Why us?',
+      featuresTitle: 'Features',
+      safeTitle: 'Safe',
+      safeText: 'All products are tested and kept up to date. Minimal ban risk.',
+      fastTitle: 'Fast delivery',
+      fastText: 'Get your product quickly through Discord. No unnecessary waiting.',
+      easyTitle: 'Easy to use',
+      easyText: 'Clear instructions come with every product. No technical skill required.',
+      supportTitle: '24/7 Support',
+      supportText: 'Problems? Someone is always available in Discord. Fast answers.',
+      updatesTitle: 'Updates',
+      updatesText: 'CS2 updates often, and we keep up. You get updates automatically.',
+      communityTitle: 'Community',
+      communityText: 'Join an active Discord community. Tips, news and more.',
+      ctaTitle: 'Join the community',
+      ctaSub: 'Orders, support and news are all handled in Discord. Click below.',
+      footer: '© 2025 VERTEX · All rights reserved · '
+    },
+    fi: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Tuotteet',
+      navFeatures: 'Ominaisuudet',
+      navJoin: 'Liity',
+      heroTitle: 'Seuraava taso<br>odottaa sinua',
+      heroSub: 'Eksklusiiviset CS2-työkalut, skin changerit ja paljon muuta. Laatu ja turvallisuus ensin.',
+      heroProducts: 'Katso tuotteet',
+      statusCustomers: 'Asiakasta',
+      statusSupport: 'Tuki',
+      statusProducts: 'Tuotetta',
+      productsLabel: 'Tuotteet',
+      productsTitle: 'Mitä tarjoamme',
+      radarDesc: 'Tehokas ja turvallinen CS2 web radar, joka näyttää tilanteen selkeästi selaimessa. Jatkuvat päivitykset pitävät palvelun ajan tasalla.',
+      radarFeature1: 'Reaaliaikainen pelaajien seuranta',
+      radarFeature2: 'Suuntanuolet ja FOV-kartiot',
+      radarFeature3: 'Health barit ja pelaajalista',
+      radarFeature4: 'Zoomaus ja kartan liikuttelu',
+      radarFeature5: 'Killfeed aseilla ja headshot-merkinnöillä',
+      radarFeature6: 'Asetukset nimille, kuolleille ja FOV:lle',
+      askPrice: 'Kysy hintaa ',
+      orderNow: 'Tilaa nyt ->',
+      skinDesc: 'Muuta aseidesi ulkonäkö mistä tahansa mihin tahansa. Kaikki skins saatavillasi ilman rahaa.',
+      skinFeature1: 'Kaikki CS2 skinat',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Sticker support',
+      skinFeature4: 'StatTrak emulator',
+      skinFeature5: 'Toimimaton serveripuolella',
+      skinFeature6: 'Helppo käyttöliittymä',
+      cheatDesc: 'Täysiverinen CS2 cheat selkeällä valikolla ja säädettävillä asetuksilla. Päivitetään jokaisen pelipäivityksen mukana.',
+      cheatFeature1: 'Pelaaja-ESP ja laatikot',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Rekyylinhallinta',
+      cheatFeature4: 'Tallennettavat config-profiilit',
+      cheatFeature5: 'Asennusohje ja Discord-tuki',
+      whyLabel: 'Miksi me?',
+      featuresTitle: 'Ominaisuudet',
+      safeTitle: 'Turvallinen',
+      safeText: 'Kaikki tuotteet ovat testattu ja pidetään jatkuvasti ajan tasalla. Minimaalinen bänniriski.',
+      fastTitle: 'Nopea toimitus',
+      fastText: 'Saat tuotteesi nopeasti Discordin kautta. Ei turhia odotteluja.',
+      easyTitle: 'Helppo käyttää',
+      easyText: 'Selkeä ohjeistus jokaisen tuotteen kanssa. Ei vaadita teknistä osaamista.',
+      supportTitle: '24/7 Tuki',
+      supportText: 'Ongelmia? Discordissa aina joku apuna. Vastataan nopeasti.',
+      updatesTitle: 'Päivitykset',
+      updatesText: 'CS2 päivittyy usein, me pysymme perässä. Saat päivitykset automaattisesti.',
+      communityTitle: 'Yhteisö',
+      communityText: 'Liity aktiiviseen Discord-yhteisöön. Tipit, uutiset ja paljon muuta.',
+      ctaTitle: 'Liity yhteisöön',
+      ctaSub: 'Kaikki tilaukset, tuki ja uutiset Discordissa. Klikkaa alla.',
+      footer: '© 2025 VERTEX · Kaikki oikeudet pidätetään · '
+    },
+    ru: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Товары',
+      navFeatures: 'Функции',
+      navJoin: 'Войти',
+      heroTitle: 'Новый уровень<br>ждет тебя',
+      heroSub: 'Эксклюзивные CS2 инструменты, skin changer и многое другое. Качество и безопасность прежде всего.',
+      heroProducts: 'Смотреть товары',
+      statusCustomers: 'Клиентов',
+      statusSupport: 'Поддержка',
+      statusProducts: 'Продуктов',
+      productsLabel: 'Товары',
+      productsTitle: 'Что мы предлагаем',
+      radarDesc: 'Мощный и безопасный CS2 web radar, который ясно показывает ситуацию матча в браузере. Постоянные обновления поддерживают сервис актуальным.',
+      radarFeature1: 'Отслеживание игроков в реальном времени',
+      radarFeature2: 'Стрелки направления и FOV-конусы',
+      radarFeature3: 'Полоски здоровья и список игроков',
+      radarFeature4: 'Зум и перемещение карты',
+      radarFeature5: 'Killfeed с оружием и отметками headshot',
+      radarFeature6: 'Настройки имен, мертвых игроков и FOV',
+      askPrice: 'Спросить цену ',
+      orderNow: 'Заказать ->',
+      skinDesc: 'Меняй внешний вид оружия на любой другой. Все скины доступны без лишних затрат.',
+      skinFeature1: 'Все CS2 скины',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Поддержка стикеров',
+      skinFeature4: 'Эмулятор StatTrak',
+      skinFeature5: 'Только на стороне клиента',
+      skinFeature6: 'Простой интерфейс',
+      cheatDesc: 'Полноценный CS2 cheat с понятным меню и настраиваемыми опциями. Обновляется с каждым патчем игры.',
+      cheatFeature1: 'ESP игроков и боксы',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Контроль отдачи',
+      cheatFeature4: 'Сохраняемые профили конфигурации',
+      cheatFeature5: 'Инструкция по установке и поддержка в Discord',
+      whyLabel: 'Почему мы?',
+      featuresTitle: 'Функции',
+      safeTitle: 'Безопасно',
+      safeText: 'Все продукты тестируются и поддерживаются в актуальном состоянии. Минимальный риск бана.',
+      fastTitle: 'Быстрая доставка',
+      fastText: 'Получай продукт быстро через Discord. Без лишнего ожидания.',
+      easyTitle: 'Легко использовать',
+      easyText: 'Понятные инструкции идут с каждым продуктом. Технические навыки не нужны.',
+      supportTitle: 'Поддержка 24/7',
+      supportText: 'Проблемы? В Discord всегда есть помощь. Быстрые ответы.',
+      updatesTitle: 'Обновления',
+      updatesText: 'CS2 часто обновляется, и мы не отстаем. Обновления приходят автоматически.',
+      communityTitle: 'Сообщество',
+      communityText: 'Присоединяйся к активному Discord-сообществу. Советы, новости и многое другое.',
+      ctaTitle: 'Присоединяйся к сообществу',
+      ctaSub: 'Заказы, поддержка и новости находятся в Discord. Нажми ниже.',
+      footer: '© 2025 VERTEX · Все права защищены · '
+    },
+    de: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Produkte',
+      navFeatures: 'Features',
+      navJoin: 'Beitreten',
+      heroTitle: 'Das nächste Level<br>wartet auf dich',
+      heroSub: 'Exklusive CS2-Tools, Skin Changer und mehr. Qualität und Sicherheit zuerst.',
+      heroProducts: 'Produkte ansehen',
+      statusCustomers: 'Kunden',
+      statusSupport: 'Support',
+      statusProducts: 'Produkte',
+      productsLabel: 'Produkte',
+      productsTitle: 'Was wir anbieten',
+      radarDesc: 'Ein leistungsstarker und sicherer CS2 Web Radar, der die Match-Situation klar im Browser zeigt. Laufende Updates halten den Service aktuell.',
+      radarFeature1: 'Spielertracking in Echtzeit',
+      radarFeature2: 'Richtungspfeile und FOV-Kegel',
+      radarFeature3: 'Health Bars und Spielerliste',
+      radarFeature4: 'Zoom und Kartenbewegung',
+      radarFeature5: 'Killfeed mit Waffen und Headshot-Markierungen',
+      radarFeature6: 'Optionen für Namen, tote Spieler und FOV',
+      askPrice: 'Preis fragen ',
+      orderNow: 'Jetzt bestellen ->',
+      skinDesc: 'Ändere das Aussehen deiner Waffen von allem zu allem. Alle Skins verfügbar ohne extra Ausgaben.',
+      skinFeature1: 'Alle CS2-Skins',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Sticker-Support',
+      skinFeature4: 'StatTrak-Emulator',
+      skinFeature5: 'Nur clientseitig',
+      skinFeature6: 'Einfache Oberfläche',
+      cheatDesc: 'Ein vollwertiger CS2 Cheat mit übersichtlichem Menü und konfigurierbaren Optionen. Wird mit jedem Game-Patch aktualisiert.',
+      cheatFeature1: 'Spieler-ESP und Boxen',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Rückstosskontrolle',
+      cheatFeature4: 'Speicherbare Config-Profile',
+      cheatFeature5: 'Setup-Anleitung und Discord-Support',
+      whyLabel: 'Warum wir?',
+      featuresTitle: 'Features',
+      safeTitle: 'Sicher',
+      safeText: 'Alle Produkte werden getestet und aktuell gehalten. Minimales Bannrisiko.',
+      fastTitle: 'Schnelle Lieferung',
+      fastText: 'Du bekommst dein Produkt schnell über Discord. Kein unnötiges Warten.',
+      easyTitle: 'Einfach zu nutzen',
+      easyText: 'Klare Anleitungen kommen mit jedem Produkt. Kein technisches Wissen nötig.',
+      supportTitle: '24/7 Support',
+      supportText: 'Probleme? Im Discord ist immer jemand da. Schnelle Antworten.',
+      updatesTitle: 'Updates',
+      updatesText: 'CS2 wird oft aktualisiert, und wir bleiben dran. Updates kommen automatisch.',
+      communityTitle: 'Community',
+      communityText: 'Tritt einer aktiven Discord-Community bei. Tipps, News und mehr.',
+      ctaTitle: 'Tritt der Community bei',
+      ctaSub: 'Bestellungen, Support und News laufen über Discord. Klicke unten.',
+      footer: '© 2025 VERTEX · Alle Rechte vorbehalten · '
+    },
+    fr: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Produits',
+      navFeatures: 'Fonctions',
+      navJoin: 'Rejoindre',
+      heroTitle: 'Le niveau suivant<br>t’attend',
+      heroSub: 'Outils CS2 exclusifs, skin changers et plus encore. Qualité et sécurité avant tout.',
+      heroProducts: 'Voir les produits',
+      statusCustomers: 'Clients',
+      statusSupport: 'Support',
+      statusProducts: 'Produits',
+      productsLabel: 'Produits',
+      productsTitle: 'Ce que nous proposons',
+      radarDesc: 'Un CS2 web radar puissant et sûr qui affiche clairement la situation du match dans le navigateur. Les mises à jour continues gardent le service à jour.',
+      radarFeature1: 'Suivi des joueurs en temps réel',
+      radarFeature2: 'Flèches de direction et cônes FOV',
+      radarFeature3: 'Barres de vie et liste des joueurs',
+      radarFeature4: 'Zoom et déplacement de la carte',
+      radarFeature5: 'Killfeed avec armes et indications headshot',
+      radarFeature6: 'Options pour noms, joueurs morts et FOV',
+      askPrice: 'Demander le prix ',
+      orderNow: 'Commander ->',
+      skinDesc: 'Change l’apparence de tes armes comme tu veux. Tous les skins disponibles sans dépense supplémentaire.',
+      skinFeature1: 'Tous les skins CS2',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Support des stickers',
+      skinFeature4: 'Émulateur StatTrak',
+      skinFeature5: 'Côté client uniquement',
+      skinFeature6: 'Interface simple',
+      cheatDesc: 'Un cheat CS2 complet avec un menu clair et des options configurables. Mis à jour à chaque patch du jeu.',
+      cheatFeature1: 'ESP joueurs et boîtes',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Contrôle du recul',
+      cheatFeature4: 'Profils de config enregistrables',
+      cheatFeature5: 'Guide d\'installation et support Discord',
+      whyLabel: 'Pourquoi nous?',
+      featuresTitle: 'Fonctions',
+      safeTitle: 'Sûr',
+      safeText: 'Tous les produits sont testés et gardés à jour. Risque de ban minimal.',
+      fastTitle: 'Livraison rapide',
+      fastText: 'Reçois ton produit rapidement via Discord. Pas d’attente inutile.',
+      easyTitle: 'Facile à utiliser',
+      easyText: 'Des instructions claires accompagnent chaque produit. Aucune compétence technique requise.',
+      supportTitle: 'Support 24/7',
+      supportText: 'Un problème? Quelqu’un est toujours disponible sur Discord. Réponses rapides.',
+      updatesTitle: 'Mises à jour',
+      updatesText: 'CS2 se met souvent à jour, et nous suivons. Les mises à jour arrivent automatiquement.',
+      communityTitle: 'Communauté',
+      communityText: 'Rejoins une communauté Discord active. Astuces, news et plus encore.',
+      ctaTitle: 'Rejoins la communauté',
+      ctaSub: 'Commandes, support et news sont sur Discord. Clique ci-dessous.',
+      footer: '© 2025 VERTEX · Tous droits réservés · '
+    },
+    it: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Prodotti',
+      navFeatures: 'Funzioni',
+      navJoin: 'Entra',
+      heroTitle: 'Il livello successivo<br>ti aspetta',
+      heroSub: 'Strumenti CS2 esclusivi, skin changer e altro. Qualità e sicurezza prima di tutto.',
+      heroProducts: 'Vedi prodotti',
+      statusCustomers: 'Clienti',
+      statusSupport: 'Supporto',
+      statusProducts: 'Prodotti',
+      productsLabel: 'Prodotti',
+      productsTitle: 'Cosa offriamo',
+      radarDesc: 'Un CS2 web radar potente e sicuro che mostra chiaramente la situazione del match nel browser. Gli aggiornamenti continui mantengono il servizio attuale.',
+      radarFeature1: 'Tracciamento giocatori in tempo reale',
+      radarFeature2: 'Frecce direzionali e coni FOV',
+      radarFeature3: 'Barre vita e lista giocatori',
+      radarFeature4: 'Zoom e spostamento mappa',
+      radarFeature5: 'Killfeed con armi e indicatori headshot',
+      radarFeature6: 'Opzioni per nomi, morti e FOV',
+      askPrice: 'Chiedi prezzo ',
+      orderNow: 'Ordina ->',
+      skinDesc: 'Cambia l’aspetto delle tue armi come vuoi. Tutte le skin disponibili senza spese extra.',
+      skinFeature1: 'Tutte le skin CS2',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Supporto sticker',
+      skinFeature4: 'Emulatore StatTrak',
+      skinFeature5: 'Solo lato client',
+      skinFeature6: 'Interfaccia semplice',
+      cheatDesc: 'Un cheat CS2 completo con menu chiaro e opzioni configurabili. Aggiornato a ogni patch del gioco.',
+      cheatFeature1: 'ESP giocatori e box',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Controllo del rinculo',
+      cheatFeature4: 'Profili di config salvabili',
+      cheatFeature5: 'Guida all\'installazione e supporto Discord',
+      whyLabel: 'Perché noi?',
+      featuresTitle: 'Funzioni',
+      safeTitle: 'Sicuro',
+      safeText: 'Tutti i prodotti sono testati e mantenuti aggiornati. Rischio ban minimo.',
+      fastTitle: 'Consegna veloce',
+      fastText: 'Ricevi il prodotto rapidamente tramite Discord. Nessuna attesa inutile.',
+      easyTitle: 'Facile da usare',
+      easyText: 'Istruzioni chiare con ogni prodotto. Nessuna competenza tecnica richiesta.',
+      supportTitle: 'Supporto 24/7',
+      supportText: 'Problemi? Su Discord c’è sempre qualcuno. Risposte rapide.',
+      updatesTitle: 'Aggiornamenti',
+      updatesText: 'CS2 si aggiorna spesso e noi restiamo al passo. Gli aggiornamenti arrivano automaticamente.',
+      communityTitle: 'Community',
+      communityText: 'Entra in una community Discord attiva. Consigli, news e altro.',
+      ctaTitle: 'Entra nella community',
+      ctaSub: 'Ordini, supporto e news sono su Discord. Clicca sotto.',
+      footer: '© 2025 VERTEX · Tutti i diritti riservati · '
+    },
+    es: {
+      title: 'VERTEX - CS2 Web Radar & More',
+      navProducts: 'Productos',
+      navFeatures: 'Funciones',
+      navJoin: 'Unirse',
+      heroTitle: 'El siguiente nivel<br>te espera',
+      heroSub: 'Herramientas CS2 exclusivas, skin changers y más. Calidad y seguridad primero.',
+      heroProducts: 'Ver productos',
+      statusCustomers: 'Clientes',
+      statusSupport: 'Soporte',
+      statusProducts: 'Productos',
+      productsLabel: 'Productos',
+      productsTitle: 'Qué ofrecemos',
+      radarDesc: 'Un CS2 web radar potente y seguro que muestra claramente la situación de la partida en el navegador. Las actualizaciones continuas mantienen el servicio al día.',
+      radarFeature1: 'Seguimiento de jugadores en tiempo real',
+      radarFeature2: 'Flechas de dirección y conos FOV',
+      radarFeature3: 'Barras de vida y lista de jugadores',
+      radarFeature4: 'Zoom y movimiento del mapa',
+      radarFeature5: 'Killfeed con armas e indicadores headshot',
+      radarFeature6: 'Opciones para nombres, muertos y FOV',
+      askPrice: 'Preguntar precio ',
+      orderNow: 'Ordenar ->',
+      skinDesc: 'Cambia el aspecto de tus armas como quieras. Todas las skins disponibles sin gasto extra.',
+      skinFeature1: 'Todas las skins de CS2',
+      skinFeature2: 'Knife & Glove changer',
+      skinFeature3: 'Soporte de stickers',
+      skinFeature4: 'Emulador StatTrak',
+      skinFeature5: 'Solo del lado del cliente',
+      skinFeature6: 'Interfaz fácil',
+      cheatDesc: 'Un cheat de CS2 completo con menú claro y opciones configurables. Se actualiza con cada parche del juego.',
+      cheatFeature1: 'ESP de jugadores y cajas',
+      cheatFeature2: 'Triggerbot',
+      cheatFeature3: 'Control de retroceso',
+      cheatFeature4: 'Perfiles de config guardables',
+      cheatFeature5: 'Guía de instalación y soporte en Discord',
+      whyLabel: '¿Por qué nosotros?',
+      featuresTitle: 'Funciones',
+      safeTitle: 'Seguro',
+      safeText: 'Todos los productos se prueban y se mantienen actualizados. Riesgo mínimo de ban.',
+      fastTitle: 'Entrega rápida',
+      fastText: 'Recibe tu producto rápido por Discord. Sin esperas innecesarias.',
+      easyTitle: 'Fácil de usar',
+      easyText: 'Instrucciones claras con cada producto. No se requiere habilidad técnica.',
+      supportTitle: 'Soporte 24/7',
+      supportText: '¿Problemas? Siempre hay alguien en Discord. Respuestas rápidas.',
+      updatesTitle: 'Actualizaciones',
+      updatesText: 'CS2 se actualiza a menudo y nosotros seguimos el ritmo. Recibes actualizaciones automáticamente.',
+      communityTitle: 'Comunidad',
+      communityText: 'Únete a una comunidad activa de Discord. Consejos, noticias y más.',
+      ctaTitle: 'Únete a la comunidad',
+      ctaSub: 'Pedidos, soporte y noticias están en Discord. Haz clic abajo.',
+      footer: '© 2025 VERTEX · Todos los derechos reservados · '
+    }
+  };
+
+  const textTargets = [
+    ['.nav-links li:nth-child(1) a', 'navProducts'],
+    ['.nav-links li:nth-child(2) a', 'navFeatures'],
+    ['.nav-discord', 'navJoin'],
+    ['.hero-title', 'heroTitle', true],
+    ['.hero-sub', 'heroSub'],
+    ['.btn-primary .btn-label', 'heroProducts'],
+    ['.status-item:nth-child(1) .status-label', 'statusCustomers'],
+    ['.status-item:nth-child(5) .status-label', 'statusSupport'],
+    ['.status-item:nth-child(7) .status-label', 'statusProducts'],
+    ['#products .section-label', 'productsLabel'],
+    ['#products .section-title', 'productsTitle'],
+    ['.product-card:nth-child(1) .card-desc', 'radarDesc'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(1)', 'radarFeature1'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(2)', 'radarFeature2'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(3)', 'radarFeature3'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(4)', 'radarFeature4'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(5)', 'radarFeature5'],
+    ['.product-card:nth-child(1) .card-features li:nth-child(6)', 'radarFeature6'],
+    ['.product-card:nth-child(2) .card-desc', 'skinDesc'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(1)', 'skinFeature1'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(2)', 'skinFeature2'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(3)', 'skinFeature3'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(4)', 'skinFeature4'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(5)', 'skinFeature5'],
+    ['.product-card:nth-child(2) .card-features li:nth-child(6)', 'skinFeature6'],
+    ['.product-card:nth-child(3) .card-desc', 'cheatDesc'],
+    ['.product-card:nth-child(3) .card-features li:nth-child(1)', 'cheatFeature1'],
+    ['.product-card:nth-child(3) .card-features li:nth-child(2)', 'cheatFeature2'],
+    ['.product-card:nth-child(3) .card-features li:nth-child(3)', 'cheatFeature3'],
+    ['.product-card:nth-child(3) .card-features li:nth-child(4)', 'cheatFeature4'],
+    ['.product-card:nth-child(3) .card-features li:nth-child(5)', 'cheatFeature5'],
+    ['#features .section-label', 'whyLabel'],
+    ['#features .section-title', 'featuresTitle'],
+    ['.feature-item:nth-child(1) .feature-title', 'safeTitle'],
+    ['.feature-item:nth-child(1) .feature-text', 'safeText'],
+    ['.feature-item:nth-child(2) .feature-title', 'fastTitle'],
+    ['.feature-item:nth-child(2) .feature-text', 'fastText'],
+    ['.feature-item:nth-child(3) .feature-title', 'easyTitle'],
+    ['.feature-item:nth-child(3) .feature-text', 'easyText'],
+    ['.feature-item:nth-child(4) .feature-title', 'supportTitle'],
+    ['.feature-item:nth-child(4) .feature-text', 'supportText'],
+    ['.feature-item:nth-child(5) .feature-title', 'updatesTitle'],
+    ['.feature-item:nth-child(5) .feature-text', 'updatesText'],
+    ['.feature-item:nth-child(6) .feature-title', 'communityTitle'],
+    ['.feature-item:nth-child(6) .feature-text', 'communityText'],
+    ['.cta-title', 'ctaTitle'],
+    ['.cta-sub', 'ctaSub']
+  ];
+
+  function setLanguage(lang) {
+    const copy = translations[lang] || translations.en;
+    const activeLang = translations[lang] ? lang : 'en';
+    document.documentElement.lang = activeLang;
+    document.title = copy.title;
+    textTargets.forEach(([selector, key, html, prefix = '']) => {
+      const el = document.querySelector(selector);
+      if (!el) return;
+      const value = prefix + copy[key];
+      if (html) el.innerHTML = value;
+      else el.textContent = value;
+    });
+    document.querySelectorAll('.card-price').forEach(el => {
+      el.innerHTML = `${copy.askPrice}<span class="price-unit">/ Discord</span>`;
+    });
+    document.querySelectorAll('.card-btn').forEach(el => {
+      el.textContent = copy.orderNow;
+    });
+    const footer = document.querySelector('footer p');
+    if (footer) {
+      footer.innerHTML = `${copy.footer}<a href="https://discord.gg/bETDpMZU" target="_blank" style="color:var(--purple-light);text-decoration:none;">Discord</a>`;
+    }
+    const options = Array.from(document.querySelectorAll('.lang-option'));
+    options.forEach(option => {
+      option.classList.toggle('active', option.dataset.langOption === activeLang);
+    });
+    const currentLanguage = document.getElementById('currentLanguage');
+    if (currentLanguage) currentLanguage.textContent = activeLang.toUpperCase();
+    localStorage.setItem('vvLanguage', activeLang);
+  }
+
+  const languageSwitch = document.querySelector('.language-switch');
+  const languageToggle = document.getElementById('languageToggle');
+  const languageOptions = document.querySelectorAll('.lang-option');
+  const savedLanguage = localStorage.getItem('vvLanguage') || 'en';
+  setLanguage(translations[savedLanguage] ? savedLanguage : 'en');
+  if (languageToggle && languageSwitch) {
+    languageToggle.addEventListener('click', event => {
+      event.stopPropagation();
+      const isOpen = languageSwitch.classList.toggle('open');
+      languageToggle.setAttribute('aria-expanded', String(isOpen));
+    });
+  }
+  languageOptions.forEach(option => {
+    option.addEventListener('click', () => {
+      setLanguage(option.dataset.langOption);
+      if (languageSwitch && languageToggle) {
+        languageSwitch.classList.remove('open');
+        languageToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+  });
+  document.addEventListener('click', event => {
+    if (!languageSwitch || !languageToggle || languageSwitch.contains(event.target)) return;
+    languageSwitch.classList.remove('open');
+    languageToggle.setAttribute('aria-expanded', 'false');
+  });
+
+  // Generate stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --d:${2+Math.random()*4}s;
+      --delay:-${Math.random()*5}s;
+      --op:${0.2+Math.random()*0.7};
+      width:${Math.random()<0.8?1:2}px;
+      height:${Math.random()<0.8?1:2}px;
+    `;
+    starsEl.appendChild(s);
+  }
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), 100 * (Array.from(reveals).indexOf(e.target) % 4));
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(r => observer.observe(r));
+</script>
+
+</body>
+</html>
